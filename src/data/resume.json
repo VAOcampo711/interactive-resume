@@ -1,23 +1,23 @@
 {
-  "introduction": { "name": "Vince", "tagline": "Software Developer passionate about building impactful web apps." },
+  "introduction": { "name": "Vince Ocampo", "tagline": "Software Developer passionate about building impactful web apps." },
   "workExperience": [
     {
-      "company": "TechCorp",
-      "role": "Frontend Developer",
-      "period": "2022 – Present",
+      "company": "Foster Moore",
+      "role": "Software Developer",
+      "period": "2023 – Present",
       "details": ["Developed React dashboards","Collaborated with backend engineers on API design"]
     }
   ],
   "education": [
-    { "institution": "University of Wellington", "degree": "BSc Computer Science", "year": "2018 – 2021" }
+    { "institution": "University of Auckland", "degree": "BSc Computer Science & Statistics", "year": "2018 – 2021" }
   ],
   "skills": ["React","TypeScript","Node.js","Git","Testing Library"],
   "projects": [
     { "title": "Portfolio Website","description": "Personal site built with React and Tailwind","github": "https://github.com/yourname/portfolio" }
   ],
   "contact": {
-    "email": "vince@example.com",
-    "linkedin": "https://linkedin.com/in/vince",
-    "github": "https://github.com/yourname"
+    "email": "andrei.ocampo711@gmail.com",
+    "linkedin": "https://www.linkedin.com/in/vince-ocampo-1050a41a5",
+    "github": "https://github.com/VAOcampo711"
   }
 }
