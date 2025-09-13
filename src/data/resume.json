@@ -1,22 +1,105 @@
 {
-  "introduction": { "name": "Vince Ocampo", "tagline": "Software Developer passionate about building impactful web apps." },
+  "introduction": {
+    "name": "Vince Ocampo",
+    "tagline": "Software developer with experience in configuration, full-stack development and automation testing. Skilled in delivering maintainable solutions using Java, Groovy, React, MongoDB and modern web technologies. Thrives in Agile teams, contributing to planning, testing and releases while solving problems with a collaborative, detail-driven approach."
+  },
   "workExperience": [
     {
-      "company": "Foster Moore",
-      "role": "Software Developer",
-      "period": "2023 – Present",
-      "details": ["Developed React dashboards","Collaborated with backend engineers on API design"]
+      "company": "Foster Moore - The registry people®",
+      "role": "Software Configuration Developer",
+      "period": "Sep 2025 – Present",
+      "details": [
+        "Moved to Global Support Services: Helping maintain and provide fixes for existing business registers",
+        "Part of release process for software updates and fixes for registers",
+        "Maintained existing automated tests and created new ones to support bug fixes and system updates",
+        "Continue performing data fixes in MongoDB"
+      ]
+    },
+    {
+      "company": "",
+      "role": "Junior Software Developer",
+      "period": "Nov 2023 – Aug 2025",
+      "details": [
+        "Continued work on the CIPA upgrade project",
+        "Became confident in using Groovy alongside Verne",
+        "Built confidence in writing automated test scripts",
+        "Learning to do data fixes in MongoDB using JavaScript"
+      ]
+    },
+    {
+      "company": "",
+      "role": "Graduate Software Developer",
+      "period": "Mar 2023 – Oct 2023",
+      "details": [
+        "Start in Consulting: Helping create new business registers",
+        "Started work on CIPA upgrade project",
+        "Programming using Verne: Company software language used to create registry software",
+        "Learned to write automated tests and did a bit of manual testing",
+        "Had a chance to document spec requirements for developers to work on based on client feedback"
+      ]
+    },
+    {
+      "company": "Doorknock",
+      "role": "Intern Software Developer",
+      "period": "Jul 2022 – Sep 2022",
+      "details": [
+        "Assisted in building an MVP to validate the company's product concept",
+        "Partnered with developers to convert UX designs into working website features",
+        "Practiced Agile delivery via daily stand-ups, Kanban boards, Jira, and Bitbucket",
+        "Built front-end features in React, Gatsby, and Tailwind with GraphQL & Firestore",
+        "Implemented interactive maps using Mapbox"
+      ]
     }
   ],
   "education": [
-    { "institution": "University of Auckland", "degree": "BSc Computer Science & Statistics", "year": "2018 – 2021" }
+    {
+      "institution": "University of Auckland",
+      "degree": "Bachelor of Science – Computer Science & Statistics",
+      "year": "2018 – 2021"
+    },
+    {
+      "institution": "Mission Ready",
+      "degree": "Certificate in Digital Technology Product Solutions (Level 5)",
+      "year": "Apr 2022 – Jun 2022"
+    },
+    {
+      "institution": "Mission Ready",
+      "degree": "Certificate in Applied Technology Development Essentials (Level 6)",
+      "year": "Apr 2022 – Jun 2022"
+    }
   ],
-  "skills": ["React","TypeScript","Node.js","Git","Testing Library"],
+  "skills": [
+    {
+      "category": "Languages & Frameworks",
+      "skills": ["Java", "Groovy", "Python", "JavaScript", "TypeScript", "HTML", "CSS", "React", "Gatsby", "Tailwind", "Sass"]
+    },
+    {
+      "category": "Databases",
+      "skills": ["MongoDB", "SQL", "NoSQL", "GraphQL", "Firestore"]
+    },
+    {
+      "category": "Testing & Automation",
+      "skills": ["Cucumber", "Gherkin", "Unit Testing (Python, Node.js)"]
+    },
+    {
+      "category": "Tools & Version Control",
+      "skills": ["Git", "GitHub", "GitLab", "Bitbucket", "Jira"]
+    },
+    {
+      "category": "Data Analysis",
+      "skills": ["R", "SAS", "Excel"]
+    }
+  ],
   "projects": [
-    { "title": "Portfolio Website","description": "Personal site built with React and Tailwind","github": "https://github.com/yourname/portfolio" }
+    {
+      "title": "Interactive Resume",
+      "description": "This website!",
+      "github": "https://github.com/VAOcampo711/interactive-resume"
+    }
   ],
   "contact": {
     "email": "andrei.ocampo711@gmail.com",
+    "mobile": "021 026 00051",
     "linkedin": "https://www.linkedin.com/in/vince-ocampo-1050a41a5",
     "github": "https://github.com/VAOcampo711"
   }
