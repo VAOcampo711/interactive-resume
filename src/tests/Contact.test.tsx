@@ -26,7 +26,7 @@ describe('Contact Component', () => {
         render(<Contact data={mockContactData} />);
 
         expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Contact');
-        expect(screen.getByText('Feel free to reach out via email, LinkedIn, or GitHub')).toBeInTheDocument();
+        expect(screen.getByText('Feel free to reach out via')).toBeInTheDocument();
     });
 
     it('renders all contact links with correct attributes', () => {

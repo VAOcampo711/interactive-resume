@@ -88,11 +88,11 @@ describe('Projects Component', () => {
 
         // Check section has correct classes
         const section = container.querySelector('section');
-        expect(section).toHaveClass('py-12', 'bg-gray-50', 'dark:bg-gray-800');
+        expect(section).toHaveClass('py-8', 'sm:py-12', 'bg-gray-50', 'dark:bg-gray-800');
 
         // Check grid layout
         const gridContainer = container.querySelector('.grid');
-        expect(gridContainer).toHaveClass('md:grid-cols-2', 'gap-6');
+        expect(gridContainer).toHaveClass('grid', 'grid-cols-1', 'md:grid-cols-2', 'gap-4', 'sm:gap-6');
 
         // Check project cards have hover effects
         const projectCards = container.querySelectorAll('.hover\\:scale-105');
@@ -117,7 +117,7 @@ describe('Projects Component', () => {
         expect(projectTitles).toHaveLength(3);
 
         projectTitles.forEach(title => {
-            expect(title).toHaveClass('text-lg', 'font-semibold', 'text-gray-800', 'dark:text-gray-200');
+            expect(title).toHaveClass('text-base', 'sm:text-lg', 'font-semibold', 'text-gray-800', 'dark:text-gray-200');
         });
     });
 
