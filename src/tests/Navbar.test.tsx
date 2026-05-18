@@ -13,7 +13,7 @@ describe('Navbar Component', () => {
         document.getElementById = vi.fn((_id) => ({
             getBoundingClientRect: () => ({ top: 100 }),
             offsetHeight: 200,
-        } as any));
+        } as never));
 
         // The Navbar calls document.querySelector('nav') in two places:
         //   1. scrollToSection / handleScroll  — reads .offsetHeight
@@ -22,7 +22,7 @@ describe('Navbar Component', () => {
         document.querySelector = vi.fn(() => ({
             offsetHeight: 60,
             contains: (_node: Node | null) => false,
-        } as any));
+        } as never));
     });
 
     afterEach(() => {
@@ -44,7 +44,7 @@ describe('Navbar Component', () => {
 
     // Test Case 2: Mobile menu toggle functionality
     // The desktop <ul> is always in the DOM (just CSS-hidden via Tailwind), so
-    // queryByRole('list') always finds it. Instead we query for the mobile panel
+    // queryByRole('list') always finds it. Instead, we query for the mobile panel
     // div by its unique classes (.absolute.top-full), which only mounts when open.
     it('toggles mobile menu when hamburger button is clicked', () => {
         const { container } = render(<Navbar />);
@@ -125,7 +125,7 @@ describe('Navbar Component', () => {
         expect(document.body.style.overflow).toBe('unset');
     });
 
-    // Test Case 7: Mobile navigation shows user name
+    // Test Case 7: Mobile navigation shows username
     it('displays user name in mobile navigation header', () => {
         render(<Navbar />);
         expect(screen.getByText('Vince Ocampo')).toBeInTheDocument();
@@ -145,7 +145,7 @@ describe('Navbar Component', () => {
             return {
                 getBoundingClientRect: () => ({ top: tops[id] ?? 9999 }),
                 offsetHeight: 250,
-            } as any;
+            } as never;
         });
 
         render(<Navbar />);
