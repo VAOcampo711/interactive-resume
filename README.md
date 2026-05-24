@@ -187,6 +187,6 @@ npm run preview
 ## Author
 
 **Vince Ocampo**
-- Email: andrei.ocampo711@gmail.com
+- Email: vinceocampo711@icloud.com
 - LinkedIn: [linkedin.com/in/vince-ocampo-1050a41a5](https://www.linkedin.com/in/vince-ocampo-1050a41a5)
 - GitHub: [github.com/VAOcampo711](https://github.com/VAOcampo711)
