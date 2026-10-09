@@ -1,6 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import '@testing-library/jest-dom/vitest';
 import Contact from '../components/Contact';
 import type { ContactInfo } from '../types/resume';
 

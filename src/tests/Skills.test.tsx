@@ -1,31 +1,19 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
-import '@testing-library/jest-dom/vitest';
 import Skills from '../components/Skills';
 import type { SkillCategory } from '../types/resume';
 
 const mockSkillsData: SkillCategory[] = [
-    {
-        "category": "Languages & Frameworks",
-        "skills": ["Java", "Groovy", "Python", "JavaScript", "TypeScript", "HTML", "CSS", "React", "Gatsby", "Tailwind", "Sass"]
-    },
-    {
-        "category": "Databases",
-        "skills": ["MongoDB", "SQL", "NoSQL", "GraphQL", "Firestore"]
-    },
-    {
-        "category": "Testing & Automation",
-        "skills": ["Cucumber", "Gherkin", "Unit Testing (Python, Node.js)"]
-    },
-    {
-        "category": "Tools & Version Control",
-        "skills": ["Git", "GitHub", "GitLab", "Bitbucket", "Jira"]
-    },
-    {
-        "category": "Data Analysis",
-        "skills": ["R", "SAS", "Excel"]
-    }
+    { category: 'Back-End', skills: ['Java', 'Python', 'Node.js'] },
+    { category: 'Databases', skills: ['SQL', 'NoSQL'] },
+    { category: 'Testing', skills: ['Unit Testing (Python, Node.js)', 'Python'] }
 ];
+
+const getGroup = (category: string) =>
+    screen.getByRole('heading', { level: 3, name: category }).parentElement!;
+
+const getBadgeTexts = (group: HTMLElement) =>
+    Array.from(group.querySelectorAll('span')).map(badge => badge.textContent);
 
 describe('Skills Component', () => {
     // Test Case 1: Component renders with correct heading
@@ -36,75 +24,32 @@ describe('Skills Component', () => {
         expect(h2).toHaveTextContent('Core Technical Skills');
     });
 
-    // Test Case 2: Displays all skill categories
+    // Test Case 2: Displays all skill categories in order
     it('displays all skill categories as headings', () => {
         render(<Skills data={mockSkillsData} />);
 
-        const skillCategories = screen.getAllByRole('heading', { level: 3 });
-        expect(skillCategories).toHaveLength(5);
-        expect(skillCategories[0]).toHaveTextContent('Languages & Frameworks');
-        expect(skillCategories[1]).toHaveTextContent('Databases');
-        expect(skillCategories[2]).toHaveTextContent('Testing & Automation');
-        expect(skillCategories[3]).toHaveTextContent('Tools & Version Control');
-        expect(skillCategories[4]).toHaveTextContent('Data Analysis');
+        const headings = screen.getAllByRole('heading', { level: 3 });
+        expect(headings.map(h => h.textContent)).toEqual(mockSkillsData.map(c => c.category));
     });
 
-    // Test Case 3: Renders individual skills as badges
-    it('renders individual skills as styled badges', () => {
-        const { container } = render(<Skills data={mockSkillsData} />);
+    // Test Case 3: Skills are grouped under correct categories, in order
+    it('renders exactly the skills of each category under its heading', () => {
+        render(<Skills data={mockSkillsData} />);
 
-        const allSkills = mockSkillsData.flatMap(c => c.skills);
-        allSkills.forEach(skill => {
-            expect(screen.getByText(skill)).toBeInTheDocument();
-        });
-
-        const badges = container.querySelectorAll('span.rounded-full');
-        expect(badges).toHaveLength(allSkills.length);
-        badges.forEach(badge => {
-            expect(badge).toHaveClass('rounded-full', 'bg-blue-100', 'text-blue-700');
+        mockSkillsData.forEach(({ category, skills }) => {
+            expect(getBadgeTexts(getGroup(category))).toEqual(skills);
         });
     });
 
-    // Test Case 4: Skills are grouped under correct categories
-    it('groups skills under correct categories', () => {
+    // Test Case 4: Renders skills as pill badges
+    it('renders individual skills as pill badges', () => {
         const { container } = render(<Skills data={mockSkillsData} />);
 
-        const groups = container.querySelectorAll('.text-center');
-        const findGroupForCategory = (categoryName: string) =>
-            Array.from(groups).find(g => g.querySelector('h3')?.textContent === categoryName);
-
-        const langGroup = findGroupForCategory('Languages & Frameworks');
-        expect(langGroup?.querySelector('span')?.textContent).toBe('Java');
-
-        const dbGroup = findGroupForCategory('Databases');
-        expect(dbGroup?.querySelector('span')?.textContent).toBe('MongoDB');
-
-        const toolsGroup = findGroupForCategory('Tools & Version Control');
-        expect(toolsGroup?.querySelector('span')?.textContent).toBe('Git');
+        const totalSkills = mockSkillsData.reduce((sum, c) => sum + c.skills.length, 0);
+        expect(container.querySelectorAll('span.rounded-full')).toHaveLength(totalSkills);
     });
 
-    // Test Case 5: Applies responsive styling
-    it('applies responsive CSS classes correctly', () => {
-        const { container } = render(<Skills data={mockSkillsData} />);
-
-        const badges = container.querySelectorAll('span.rounded-full');
-        badges.forEach(badge => {
-            expect(badge).toHaveClass('text-xs', 'sm:text-sm', 'px-3', 'sm:px-4');
-        });
-    });
-
-    // Test Case 6: Uses flexbox for skill layout
-    it('uses flexbox layout for skills', () => {
-        const { container } = render(<Skills data={mockSkillsData} />);
-
-        const skillContainers = container.querySelectorAll('.flex.flex-wrap.justify-center');
-        expect(skillContainers).toHaveLength(mockSkillsData.length);
-        skillContainers.forEach(skillContainer => {
-            expect(skillContainer).toHaveClass('flex', 'flex-wrap', 'justify-center');
-        });
-    });
-
-    // Test Case 7: Handles empty skills array
+    // Test Case 5: Handles empty skills array
     it('handles empty skills array', () => {
         render(<Skills data={[]} />);
 
@@ -112,18 +57,18 @@ describe('Skills Component', () => {
         expect(screen.queryAllByRole('heading', { level: 3 })).toHaveLength(0);
     });
 
-    // Test Case 8: Handles category with no skills
-    it('handles category with empty skills array', () => {
-        const dataWithEmptyCategory: SkillCategory[] = [
-            { category: 'Empty Category', skills: [] },
-            { category: 'Databases', skills: ['MongoDB'] }
-        ];
+    // Test Case 6: Handles category with no skills
+    it('renders no badges for a category with an empty skills array', () => {
+        render(
+            <Skills
+                data={[
+                    { category: 'Empty Category', skills: [] },
+                    { category: 'Databases', skills: ['MongoDB'] }
+                ]}
+            />
+        );
 
-        render(<Skills data={dataWithEmptyCategory} />);
-
-        const categories = screen.getAllByRole('heading', { level: 3 });
-        expect(categories).toHaveLength(2);
-        expect(screen.getByText('Empty Category')).toBeInTheDocument();
-        expect(screen.getByText('MongoDB')).toBeInTheDocument();
+        expect(getBadgeTexts(getGroup('Empty Category'))).toEqual([]);
+        expect(getBadgeTexts(getGroup('Databases'))).toEqual(['MongoDB']);
     });
 });

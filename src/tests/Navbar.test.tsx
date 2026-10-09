@@ -1,6 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import '@testing-library/jest-dom/vitest';
 import Navbar from '../components/Navbar';
 
 const mockScrollTo = vi.fn();
@@ -10,7 +9,7 @@ describe('Navbar Component', () => {
     beforeEach(() => {
         vi.clearAllMocks();
 
-        document.getElementById = vi.fn((_id) => ({
+        document.getElementById = vi.fn(() => ({
             getBoundingClientRect: () => ({ top: 100 }),
             offsetHeight: 200,
         } as never));
@@ -21,7 +20,7 @@ describe('Navbar Component', () => {
         // Both must be satisfied by the mock.
         document.querySelector = vi.fn(() => ({
             offsetHeight: 60,
-            contains: (_node: Node | null) => false,
+            contains: () => false,
         } as never));
     });
 
