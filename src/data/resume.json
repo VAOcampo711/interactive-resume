@@ -1,7 +1,7 @@
 {
   "introduction": {
     "name": "Vince Ocampo",
-    "tagline": "Software developer with experience in configuration, full-stack development and automation testing. Skilled in delivering maintainable solutions using Java, Groovy, React, MongoDB and modern web technologies. Thrives in Agile teams, contributing to planning, testing and releases while solving problems with a collaborative, detail-driven approach."
+    "tagline": "Software developer working on government registry platforms, with experience across the full delivery lifecycle, from developing new services and running major platform upgrades to release coordination and production support. Skilled in Java and Groovy development, resolving live data issues using MongoDB aggregation scripting and maintaining automated test suites with Cucumber/Gherkin, alongside building full-stack web applications with React, TypeScript and Node-based tooling. Comfortable owning release cycles end-to-end in Agile teams, from UAT through production go-live, with a collaborative, detail-driven approach to problem-solving."
   },
   "workExperience": [
     {
@@ -9,10 +9,13 @@
       "role": "Software Configuration Developer",
       "period": "Sep 2025 – Present",
       "details": [
-        "Moved to Global Support Services: Helping maintain and provide fixes for existing business registers",
-        "Part of release process for software updates and fixes for registers",
-        "Maintained existing automated tests and created new ones to support bug fixes and system updates",
-        "Continue performing data fixes in MongoDB"
+        "Troubleshoot production issues and coordinate triage of bugs and support tickets for live business registers as part of Global Support Services",
+        "Build monthly release packages for UAT and production. Ensure automated tests pass in Jenkins before deployment and provide standby support during production go-live",
+        "Manage environment configuration for services such as Redis, Elasticsearch, MongoDB and RabbitMQ",
+        "Write JavaScript data-fix scripts using MongoDB aggregation pipelines to resolve production data issues, with dry runs, backups and rollback steps. Help standardise the team's data-fix process by creating reusable script templates",
+        "Carry out major platform upgrades, merging core platform changes into project code and fixing the tests that break",
+        "Review teammates' pull requests for correctness, test coverage and consistency with project standards",
+        "Pick up new codebases quickly, delivering features and urgent production fixes across multiple live systems"
       ]
     },
     {
@@ -20,10 +23,11 @@
       "role": "Junior Software Developer",
       "period": "Nov 2023 – Aug 2025",
       "details": [
-        "Continued work on the CIPA upgrade project",
-        "Became confident in using Groovy alongside Verne",
-        "Built confidence in writing automated test scripts",
-        "Learning to do data fixes in MongoDB using JavaScript"
+        "Took on greater ownership of the national registry rebuild through to go-live, then moved with it into production support",
+        "Built registry services including registration, corrections, renewals, beneficial ownership and restoration, with the rules, forms, data models, certificates and notifications behind them",
+        "Expanded automated test coverage with Cucumber/Gherkin scenarios and seed data generators, reworked the test structure and fixed intermittently failing tests",
+        "Began performing MongoDB data fixes in UAT using JavaScript, laying the groundwork for the standardised data-fix process introduced in the current role",
+        "Documented spec requirements based on client feedback, translating them into actionable work for the development team"
       ]
     },
     {
@@ -31,11 +35,10 @@
       "role": "Graduate Software Developer",
       "period": "Mar 2023 – Oct 2023",
       "details": [
-        "Start in Consulting: Helping create new business registers",
-        "Started work on CIPA upgrade project",
-        "Programming using Verne: Company software language used to create registry software",
-        "Learned to write automated tests and did a bit of manual testing",
-        "Had a chance to document spec requirements for developers to work on based on client feedback"
+        "Joined the Consulting team, helping build new business registers for clients using Verne, the company's registry programming language based on Java and Groovy",
+        "Began contributing to modernising a national registry from a legacy system onto the company's platform",
+        "Delivered early registry features such as registration form changes and access permission rules",
+        "Wrote automated tests using the company's Cucumber/Gherkin-based testing framework, alongside some manual testing"
       ]
     },
     {
@@ -43,11 +46,9 @@
       "role": "Intern Software Developer",
       "period": "Jul 2022 – Sep 2022",
       "details": [
-        "Assisted in building an MVP to validate the company's product concept",
-        "Partnered with developers to convert UX designs into working website features",
-        "Practiced Agile delivery via daily stand-ups, Kanban boards, Jira, and Bitbucket",
-        "Built front-end features in React, Gatsby, and Tailwind with GraphQL & Firestore",
-        "Implemented interactive maps using Mapbox"
+        "Assisted in building an MVP to validate the company's product concept, working with other devs and UX designers to convert designs into working website features",
+        "Built front-end features in React, Gatsby and Tailwind with GraphQL and Firestore",
+        "Practiced Agile delivery via daily stand-ups, Kanban boards, Jira and Bitbucket"
       ]
     }
   ],
@@ -70,24 +71,28 @@
   ],
   "skills": [
     {
-      "category": "Languages & Frameworks",
-      "skills": ["Java", "Groovy", "Python", "JavaScript", "TypeScript", "HTML", "CSS", "React", "Gatsby", "Tailwind", "Sass"]
+      "category": "Back-End",
+      "skills": ["Java", "Groovy", "Spring Boot", "Python", "Node.js", "Maven"]
+    },
+    {
+      "category": "Front-End",
+      "skills": ["React", "TypeScript", "JavaScript", "HTML", "CSS", "Tailwind"]
     },
     {
       "category": "Databases",
-      "skills": ["MongoDB", "SQL", "NoSQL", "GraphQL", "Firestore"]
+      "skills": ["MongoDB", "SQL", "GraphQL", "NoSQL", "Firestore"]
     },
     {
-      "category": "Testing & Automation",
-      "skills": ["Cucumber", "Gherkin", "Unit Testing (Python, Node.js)"]
+      "category": "Testing & CI/CD",
+      "skills": ["Cucumber", "Gherkin", "Unit/Integration Testing (Groovy, Python, Node.js)", "Jenkins", "GitHub Actions"]
     },
     {
       "category": "Tools & Version Control",
-      "skills": ["Git", "GitHub", "GitLab", "Bitbucket", "Jira"]
+      "skills": ["Git", "GitHub", "Docker", "Jira", "Bitbucket", "GitLab", "Claude Code"]
     },
     {
-      "category": "Data Analysis",
-      "skills": ["R", "SAS", "Excel"]
+      "category": "Ways of Working",
+      "skills": ["Agile", "Kanban", "Sprint planning", "Code review via pull requests", "Release & change management"]
     }
   ],
   "projects": [
