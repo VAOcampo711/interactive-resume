@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import Navbar from '../components/Navbar';
 
@@ -179,5 +179,119 @@ describe('Navbar Component', () => {
         // which is mocked in beforeEach and returns a plain object.
         const nav = container.querySelector('nav');
         expect(nav).toBeInTheDocument();
+    });
+
+    // Test Case 11: Clicking the backdrop closes the mobile menu
+    it('closes mobile menu when the backdrop is clicked', () => {
+        const { container } = render(<Navbar />);
+        const getMobilePanel = () => container.querySelector('.absolute.top-full');
+
+        fireEvent.click(screen.getByRole('button', { name: /toggle navigation menu/i }));
+        expect(getMobilePanel()).toBeInTheDocument();
+
+        fireEvent.click(container.querySelector('.fixed.inset-0') as Element);
+        expect(getMobilePanel()).not.toBeInTheDocument();
+    });
+
+    // Test Case 12: Mobile menu item scrolls to the section and closes the menu
+    it('scrolls and closes mobile menu when a mobile menu item is clicked', () => {
+        const { container } = render(<Navbar />);
+        const getMobilePanel = () => container.querySelector('.absolute.top-full');
+
+        fireEvent.click(screen.getByRole('button', { name: /toggle navigation menu/i }));
+        const mobileButtons = screen.getAllByRole('button', { name: 'Projects' });
+        fireEvent.click(mobileButtons[mobileButtons.length - 1]);
+
+        expect(mockScrollTo).toHaveBeenCalledWith({ top: 100 - 60 - 20, behavior: 'smooth' });
+        expect(getMobilePanel()).not.toBeInTheDocument();
+    });
+
+    // Test Case 13: Missing section element is ignored
+    it('does not scroll when the target section does not exist', () => {
+        document.getElementById = vi.fn(() => null);
+        render(<Navbar />);
+
+        fireEvent.click(screen.getAllByRole('button', { name: 'Work' })[0]);
+
+        expect(mockScrollTo).not.toHaveBeenCalled();
+    });
+
+    // Test Case 14: Falls back to zero offset when no navbar is found
+    it('scrolls without navbar offset when the nav element is not found', () => {
+        document.querySelector = vi.fn(() => null);
+        render(<Navbar />);
+
+        fireEvent.click(screen.getAllByRole('button', { name: 'Work' })[0]);
+
+        expect(mockScrollTo).toHaveBeenCalledWith({ top: 100 - 20, behavior: 'smooth' });
+    });
+    describe('active section near the bottom of the page', () => {
+        // Sections laid out 300px apart, as in Test Case 8
+        const mockSectionLayout = () => {
+            document.getElementById = vi.fn((id) => {
+                const tops: Record<string, number> = {
+                    introduction: 0,
+                    work: 300,
+                    education: 600,
+                    skills: 900,
+                    projects: 1200,
+                    contact: 1500,
+                };
+                return {
+                    getBoundingClientRect: () => ({ top: tops[id] ?? 9999 }),
+                    offsetHeight: 250,
+                } as never;
+            });
+        };
+
+        const activeDesktopSection = () =>
+            screen.getAllByRole('button')
+                .find(btn => btn.classList.contains('bg-blue-50') && btn.classList.contains('rounded'))
+                ?.textContent;
+
+        afterEach(() => {
+            vi.useRealTimers();
+            fireEvent.scroll(window, { target: { scrollY: 0 } });
+            Reflect.deleteProperty(document.documentElement, 'scrollHeight');
+        });
+
+        // Test Case 15: The clicked section stays highlighted while the page scrolls to it
+        it('keeps the clicked section highlighted while scrolling to it', () => {
+            vi.useFakeTimers();
+            mockSectionLayout();
+            render(<Navbar />);
+
+            fireEvent.click(screen.getAllByRole('button', { name: 'Projects' })[0]);
+            expect(activeDesktopSection()).toBe('Projects');
+
+            // The page can't scroll Projects to the top, so the spy would otherwise pick Introduction here
+            fireEvent.scroll(window, { target: { scrollY: 0 } });
+            expect(activeDesktopSection()).toBe('Projects');
+        });
+
+        // Test Case 16: The scroll spy resumes once the scroll has settled
+        it('resumes updating the active section after the scroll settles', () => {
+            vi.useFakeTimers();
+            mockSectionLayout();
+            render(<Navbar />);
+
+            fireEvent.click(screen.getAllByRole('button', { name: 'Projects' })[0]);
+            act(() => {
+                vi.advanceTimersByTime(200);
+            });
+
+            fireEvent.scroll(window, { target: { scrollY: 0 } });
+            expect(activeDesktopSection()).toBe('Introduction');
+        });
+
+        // Test Case 17: Reaching the bottom of the page highlights the last section
+        it('highlights Contact when scrolled to the bottom of the page', () => {
+            mockSectionLayout();
+            Object.defineProperty(document.documentElement, 'scrollHeight', { value: 2000, configurable: true });
+            render(<Navbar />);
+
+            fireEvent.scroll(window, { target: { scrollY: 2000 - window.innerHeight } });
+            expect(activeDesktopSection()).toBe('Contact');
+        });
     });
 });

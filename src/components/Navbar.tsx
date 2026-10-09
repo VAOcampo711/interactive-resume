@@ -1,10 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Menu, X } from 'lucide-react';
 
+const sections = ["introduction", "work", "education", "skills", "projects", "contact"] as const;
+
 export default function Navbar() {
-    const sections = ["introduction", "work", "education", "skills", "projects", "contact"] as const;
     const [activeSection, setActiveSection] = useState<string>("introduction");
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    // True while scrolling to a clicked section, so the scroll spy doesn't override the highlight
+    const isNavigatingRef = useRef(false);
+    const navigationTimerRef = useRef<number | undefined>(undefined);
+
+    // Ends navigation once scrolling has been idle for a moment (also covers clicks that don't scroll)
+    const settleNavigation = () => {
+        window.clearTimeout(navigationTimerRef.current);
+        navigationTimerRef.current = window.setTimeout(() => {
+            isNavigatingRef.current = false;
+        }, 150);
+    };
 
     const scrollToSection = (sectionId: string) => {
         const element = document.getElementById(sectionId);
@@ -20,6 +32,12 @@ export default function Navbar() {
             const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
             const offsetPosition = elementPosition - navbarHeight - 20; // 20px extra padding
 
+            // Highlight the clicked section straight away. Sections near the bottom of the page
+            // can't always be scrolled to the top, so the scroll spy would pick one above them.
+            setActiveSection(sectionId);
+            isNavigatingRef.current = true;
+            settleNavigation();
+
             window.scrollTo({
                 top: offsetPosition,
                 behavior: 'smooth'
@@ -30,6 +48,19 @@ export default function Navbar() {
     // Scroll spy functionality
     useEffect(() => {
         const handleScroll = () => {
+            if (isNavigatingRef.current) {
+                settleNavigation();
+                return;
+            }
+
+            // At the bottom of a scrollable page, the last section can't reach the top, so pick it directly
+            const { scrollHeight } = document.documentElement;
+            const isScrollable = scrollHeight > window.innerHeight;
+            if (isScrollable && window.innerHeight + window.scrollY >= scrollHeight - 2) {
+                setActiveSection(sections[sections.length - 1]);
+                return;
+            }
+
             const navbar = document.querySelector('nav');
             const navbarHeight = navbar ? navbar.offsetHeight : 0;
             const scrollPosition = window.scrollY + navbarHeight + 50; // Add some buffer
@@ -52,7 +83,10 @@ export default function Navbar() {
         // Initial call to set active section
         handleScroll();
 
-        return () => window.removeEventListener('scroll', handleScroll);
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+            window.clearTimeout(navigationTimerRef.current);
+        };
     }, []);
 
     // Close mobile menu when clicking outside

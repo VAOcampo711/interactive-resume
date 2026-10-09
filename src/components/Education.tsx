@@ -20,14 +20,14 @@ export default function Education({ data }: { data: EducationEntry[] }) {
                     Education
                 </h2>
                 <div className="space-y-6 sm:space-y-8">
-                    {groupedEducation.map((group, groupIdx) => (
-                        <div key={groupIdx} className="p-4 sm:p-6 rounded-2xl shadow bg-white dark:bg-gray-900">
+                    {groupedEducation.map((group) => (
+                        <div key={group.institution} className="p-4 sm:p-6 rounded-2xl shadow bg-white dark:bg-gray-900">
                             <h3 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-200 mb-4 border-b-2 border-blue-600 pb-2">
                                 {group.institution}
                             </h3>
                             <div className="space-y-3 ml-0 sm:ml-4">
-                                {group.entries.map((edu, eduIdx) => (
-                                    <div key={eduIdx}>
+                                {group.entries.map((edu) => (
+                                    <div key={edu.degree}>
                                         <h4 className="text-base sm:text-lg font-semibold text-gray-700 dark:text-gray-300">
                                             {edu.degree}
                                         </h4>
