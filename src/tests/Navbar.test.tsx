@@ -9,7 +9,7 @@ describe('Navbar Component', () => {
     beforeEach(() => {
         vi.clearAllMocks();
 
-        document.getElementById = vi.fn((_id) => ({
+        document.getElementById = vi.fn(() => ({
             getBoundingClientRect: () => ({ top: 100 }),
             offsetHeight: 200,
         } as never));
@@ -20,7 +20,7 @@ describe('Navbar Component', () => {
         // Both must be satisfied by the mock.
         document.querySelector = vi.fn(() => ({
             offsetHeight: 60,
-            contains: (_node: Node | null) => false,
+            contains: () => false,
         } as never));
     });
 
