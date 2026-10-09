@@ -29,20 +29,20 @@ export default function WorkExperience({ data }: { data: Job[] }) {
                     Work Experience
                 </h2>
                 <div className="space-y-8 sm:space-y-12">
-                    {groupedJobs.map((group, groupIdx) => (
-                        <div key={groupIdx} className="space-y-4 sm:space-y-6">
+                    {groupedJobs.map((group) => (
+                        <div key={`${group.company}-${group.jobs[0].period}`} className="space-y-4 sm:space-y-6">
                             <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white border-b-2 border-blue-600 pb-2">
                                 {group.company}
                             </h3>
                             <div className="space-y-4 sm:space-y-6 ml-0 sm:ml-4">
-                                {group.jobs.map((job, jobIdx) => (
-                                    <div key={jobIdx} className="border-l-4 border-blue-600 pl-4">
+                                {group.jobs.map((job) => (
+                                    <div key={`${job.role}-${job.period}`} className="border-l-4 border-blue-600 pl-4">
                                         <h4 className="text-lg sm:text-xl font-semibold text-gray-800 dark:text-gray-200">
                                             {job.role}
                                         </h4>
                                         <p className="text-sm text-gray-500 dark:text-gray-400">{job.period}</p>
                                         <ul className="list-disc list-inside mt-2 text-sm sm:text-base text-gray-700 dark:text-gray-300 space-y-1">
-                                            {job.details.map((d, i) => <li key={i}>{d}</li>)}
+                                            {job.details.map((d) => <li key={d}>{d}</li>)}
                                         </ul>
                                     </div>
                                 ))}

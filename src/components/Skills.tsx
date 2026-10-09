@@ -8,15 +8,15 @@ export default function Skills({ data }: { data: SkillCategory[] }) {
                     Core Technical Skills
                 </h2>
                 <div className="space-y-6 sm:space-y-8">
-                    {data.map((skillGroup, idx) => (
-                        <div key={idx} className="text-center">
+                    {data.map((skillGroup) => (
+                        <div key={skillGroup.category} className="text-center">
                             <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-gray-800 dark:text-gray-200">
                                 {skillGroup.category}
                             </h3>
                             <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
-                                {skillGroup.skills.map((skill, skillIdx) => (
+                                {skillGroup.skills.map((skill) => (
                                     <span
-                                        key={skillIdx}
+                                        key={skill}
                                         className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200 text-xs sm:text-sm font-medium"
                                     >
                                         {skill}

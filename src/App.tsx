@@ -12,7 +12,7 @@ import Contact from "./components/Contact";
 import "./index.css";
 
 function App() {
-    const data = resume as Resume;
+    const data: Resume = resume;
     return (
         <div className="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
             <Navbar />

@@ -9,9 +9,9 @@ export default function Projects({ data }: { data: Project[] }) {
                 </h2>
                 {/* Single column on mobile, 2 columns on desktop */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                    {data.map((p, idx) => (
+                    {data.map((p) => (
                         <div
-                            key={idx}
+                            key={p.title}
                             className="p-4 sm:p-6 rounded-2xl shadow bg-white dark:bg-gray-900 hover:scale-105 transition"
                         >
                             <h3 className="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-200">
