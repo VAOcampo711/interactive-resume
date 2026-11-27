@@ -4,18 +4,18 @@ const linkClassName = "flex items-center gap-3 px-6 py-4 bg-white dark:bg-gray-9
 
 export default function DownloadButtons() {
     return (
-        <div className="text-center mt-8">
+        <div className="text-center mt-8 print:hidden">
             <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
                 Download Resume
             </h3>
             <div className="flex flex-col sm:flex-row gap-4 items-center justify-center mt-8">
                 <a href="/assets/cv/Vince_Ocampo_CV.pdf" download className={linkClassName}>
-                    <FileText size={20} className="text-red-600" />
+                    <FileText size={20} className="text-red-600 dark:text-red-400" />
                     Download PDF
                 </a>
 
                 <a href="/assets/cv/Vince_Ocampo_CV.docx" download className={linkClassName}>
-                    <Download size={20} className="text-blue-600" />
+                    <Download size={20} className="text-blue-600 dark:text-blue-400" />
                     Download Word
                 </a>
             </div>

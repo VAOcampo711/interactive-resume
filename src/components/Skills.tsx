@@ -3,7 +3,7 @@ import type { SkillCategory } from "../types/resume";
 export default function Skills({ data }: { data: SkillCategory[] }) {
     return (
         <section id="skills" className="py-8 sm:py-12 bg-white dark:bg-gray-900">
-            <div className="container w-full max-w-5xl mx-auto px-4">
+            <div className="w-full max-w-5xl mx-auto px-4 sm:px-6">
                 <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8 text-gray-900 dark:text-white">
                     Core Technical Skills
                 </h2>

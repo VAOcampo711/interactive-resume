@@ -15,7 +15,7 @@ export default function Education({ data }: { data: EducationEntry[] }) {
 
     return (
         <section id="education" className="py-8 sm:py-12 bg-gray-50 dark:bg-gray-800">
-            <div className="container w-full max-w-5xl mx-auto px-4">
+            <div className="w-full max-w-5xl mx-auto px-4 sm:px-6">
                 <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8 text-gray-900 dark:text-white">
                     Education
                 </h2>
@@ -27,7 +27,7 @@ export default function Education({ data }: { data: EducationEntry[] }) {
                             </h3>
                             <div className="space-y-3 ml-0 sm:ml-4">
                                 {group.entries.map((edu) => (
-                                    <div key={edu.degree}>
+                                    <div key={`${edu.degree}-${edu.year}`}>
                                         <h4 className="text-base sm:text-lg font-semibold text-gray-700 dark:text-gray-300">
                                             {edu.degree}
                                         </h4>

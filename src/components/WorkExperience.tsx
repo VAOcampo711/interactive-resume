@@ -24,7 +24,7 @@ export default function WorkExperience({ data }: { data: Job[] }) {
 
     return (
         <section id="work" className="py-8 sm:py-12 bg-white dark:bg-gray-900">
-            <div className="container w-full max-w-5xl mx-auto px-4">
+            <div className="w-full max-w-5xl mx-auto px-4 sm:px-6">
                 <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-900 dark:text-white mb-6 sm:mb-8">
                     Work Experience
                 </h2>
@@ -41,7 +41,7 @@ export default function WorkExperience({ data }: { data: Job[] }) {
                                             {job.role}
                                         </h4>
                                         <p className="text-sm text-gray-500 dark:text-gray-400">{job.period}</p>
-                                        <ul className="list-disc list-inside mt-2 text-sm sm:text-base text-gray-700 dark:text-gray-300 space-y-1">
+                                        <ul className="list-disc list-outside pl-5 mt-2 text-sm sm:text-base text-gray-700 dark:text-gray-300 space-y-1">
                                             {job.details.map((d) => <li key={d}>{d}</li>)}
                                         </ul>
                                     </div>

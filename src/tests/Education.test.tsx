@@ -117,8 +117,8 @@ describe('Education Component', () => {
         expect(section).toHaveClass('py-8', 'sm:py-12');
 
         // Section wrapper has responsive horizontal padding
-        const wrapper = container.querySelector('.container');
-        expect(wrapper).toHaveClass('px-4');
+        const wrapper = container.querySelector('section > div');
+        expect(wrapper).toHaveClass('max-w-5xl', 'px-4', 'sm:px-6');
 
         // h2 has responsive text sizing
         const h2 = screen.getByRole('heading', { level: 2 });

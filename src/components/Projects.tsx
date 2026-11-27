@@ -3,7 +3,7 @@ import type { Project } from "../types/resume";
 export default function Projects({ data }: { data: Project[] }) {
     return (
         <section id="projects" className="py-8 sm:py-12 bg-gray-50 dark:bg-gray-800">
-            <div className="container w-full max-w-5xl mx-auto px-4">
+            <div className="w-full max-w-5xl mx-auto px-4 sm:px-6">
                 <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8 text-gray-900 dark:text-white">
                     Personal Projects
                 </h2>
@@ -12,7 +12,7 @@ export default function Projects({ data }: { data: Project[] }) {
                     {data.map((p) => (
                         <div
                             key={p.title}
-                            className="p-4 sm:p-6 rounded-2xl shadow bg-white dark:bg-gray-900 hover:scale-105 transition"
+                            className="p-4 sm:p-6 rounded-2xl shadow bg-white dark:bg-gray-900 motion-safe:hover:scale-105 transition-transform"
                         >
                             <h3 className="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-200">
                                 {p.title}
@@ -22,7 +22,8 @@ export default function Projects({ data }: { data: Project[] }) {
                                 <a
                                     href={p.github}
                                     target="_blank"
-                                    rel="noreferrer"
+                                    rel="noopener noreferrer"
+                                    aria-label={`View ${p.title} on GitHub`}
                                     className="text-sm sm:text-base text-blue-600 dark:text-blue-400 mt-2 inline-block hover:underline"
                                 >
                                     View on GitHub
