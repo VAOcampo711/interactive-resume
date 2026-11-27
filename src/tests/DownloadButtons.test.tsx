@@ -57,8 +57,9 @@ describe('DownloadButtons Component', () => {
         expect(pdfLink.querySelector('svg')).toBeInTheDocument();
         expect(wordLink.querySelector('svg')).toBeInTheDocument();
 
-        expect(container.querySelector('.text-red-600')).toBeInTheDocument();
-        expect(container.querySelector('.text-blue-600')).toBeInTheDocument();
+        expect(container.querySelector('.text-red-600.dark\\:text-red-400')).toBeInTheDocument();
+        expect(container.querySelector('.text-blue-600.dark\\:text-blue-400')).toBeInTheDocument();
+        expect(container.firstChild).toHaveClass('print:hidden');
     });
 
     // Test Case 6: Responsive layout

@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import Projects from '../components/Projects';
 import type { Project } from '../types/resume';
 
@@ -22,14 +22,6 @@ const mockProjectsData: Project[] = [
 ];
 
 describe('Projects Component', () => {
-    beforeEach(() => {
-        vi.clearAllMocks();
-    });
-
-    afterEach(() => {
-        vi.restoreAllMocks();
-    });
-
     it('renders projects section with correct heading', () => {
         render(<Projects data={mockProjectsData} />);
 
@@ -39,32 +31,30 @@ describe('Projects Component', () => {
     it('renders all projects with their titles and descriptions', () => {
         render(<Projects data={mockProjectsData} />);
 
-        // Check all project titles are rendered
         expect(screen.getByText('Interactive Resume')).toBeInTheDocument();
         expect(screen.getByText('E-commerce Platform')).toBeInTheDocument();
         expect(screen.getByText('Data Analysis Tool')).toBeInTheDocument();
 
-        // Check all project descriptions are rendered
         expect(screen.getByText('This website!')).toBeInTheDocument();
         expect(screen.getByText('A full-stack e-commerce solution built with React and Node.js')).toBeInTheDocument();
         expect(screen.getByText('Python-based tool for analyzing large datasets with visualization features')).toBeInTheDocument();
     });
 
-    it('renders GitHub links for projects that have them', () => {
+    it('renders GitHub links with accessible labels and security attributes', () => {
         render(<Projects data={mockProjectsData} />);
 
         const githubLinks = screen.getAllByText('View on GitHub');
-        expect(githubLinks).toHaveLength(2); // Only 2 projects have GitHub links
+        expect(githubLinks).toHaveLength(2);
 
-        // Check the first GitHub link
         expect(githubLinks[0]).toHaveAttribute('href', 'https://github.com/VAOcampo711/interactive-resume');
         expect(githubLinks[0]).toHaveAttribute('target', '_blank');
-        expect(githubLinks[0]).toHaveAttribute('rel', 'noreferrer');
+        expect(githubLinks[0]).toHaveAttribute('rel', 'noopener noreferrer');
+        expect(githubLinks[0]).toHaveAttribute('aria-label', 'View Interactive Resume on GitHub');
 
-        // Check the second GitHub link
         expect(githubLinks[1]).toHaveAttribute('href', 'https://github.com/VAOcampo711/ecommerce-platform');
         expect(githubLinks[1]).toHaveAttribute('target', '_blank');
-        expect(githubLinks[1]).toHaveAttribute('rel', 'noreferrer');
+        expect(githubLinks[1]).toHaveAttribute('rel', 'noopener noreferrer');
+        expect(githubLinks[1]).toHaveAttribute('aria-label', 'View E-commerce Platform on GitHub');
     });
 
     it('does not render GitHub link for projects without github property', () => {
@@ -78,34 +68,30 @@ describe('Projects Component', () => {
         render(<Projects data={[]} />);
 
         expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Projects');
-        // Should still render the section but with no project cards
         expect(screen.queryByText('View on GitHub')).not.toBeInTheDocument();
     });
 
     it('applies correct CSS classes for layout and styling', () => {
         const { container } = render(<Projects data={mockProjectsData} />);
 
-        // Check section has correct classes
         const section = container.querySelector('section');
         expect(section).toHaveClass('py-8', 'sm:py-12', 'bg-gray-50', 'dark:bg-gray-800');
 
-        // Check grid layout
         const gridContainer = container.querySelector('.grid');
         expect(gridContainer).toHaveClass('grid', 'grid-cols-1', 'md:grid-cols-2', 'gap-4', 'sm:gap-6');
 
-        // Check project cards have hover effects
-        const projectCards = container.querySelectorAll('.hover\\:scale-105');
+        const projectCards = container.querySelectorAll('.motion-safe\\:hover\\:scale-105');
         expect(projectCards).toHaveLength(3);
     });
 
-    it('applies hover effects and transitions to project cards', () => {
+    it('applies reduced-motion-safe hover effects and transitions to project cards', () => {
         const { container } = render(<Projects data={mockProjectsData} />);
 
-        const projectCards = container.querySelectorAll('.transition');
+        const projectCards = container.querySelectorAll('.transition-transform');
         expect(projectCards).toHaveLength(3);
 
         projectCards.forEach(card => {
-            expect(card).toHaveClass('hover:scale-105', 'transition');
+            expect(card).toHaveClass('motion-safe:hover:scale-105', 'transition-transform');
         });
     });
 
@@ -138,7 +124,6 @@ describe('Projects Component', () => {
         expect(screen.getByText('This website!')).toBeInTheDocument();
         expect(screen.getByText('View on GitHub')).toBeInTheDocument();
 
-        // Should not render other projects
         expect(screen.queryByText('E-commerce Platform')).not.toBeInTheDocument();
         expect(screen.queryByText('Data Analysis Tool')).not.toBeInTheDocument();
     });

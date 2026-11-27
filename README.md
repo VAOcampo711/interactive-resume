@@ -61,7 +61,7 @@ src/
 
 ### Prerequisites
 
-- Node.js 22.13 or later (the major version is pinned in `.nvmrc`, so `nvm use` picks it up)
+- Node.js 22.13 or later (Node 26 Active LTS is pinned in `.nvmrc`, so `nvm use` picks it up)
 - npm
 
 ### Installation
@@ -185,7 +185,7 @@ Coverage thresholds are set in `vite.config.ts`, and the run fails if coverage d
 
 ## Continuous Integration
 
-Every pull request to `master` or `develop` runs [cicd.yml](.github/workflows/cicd.yml):
+Every push and pull request to `master` or `develop` runs [cicd.yml](.github/workflows/cicd.yml):
 
 1. Lint (`npm run lint`)
 2. Tests with coverage thresholds (`npm run test:coverage`)

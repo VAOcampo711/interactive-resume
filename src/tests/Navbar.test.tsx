@@ -1,119 +1,194 @@
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import Navbar from '../components/Navbar';
 
 const mockScrollTo = vi.fn();
-Object.defineProperty(window, 'scrollTo', { value: mockScrollTo });
+Object.defineProperty(window, 'scrollTo', { value: mockScrollTo, writable: true });
+
+const defaultSectionTops: Record<string, number> = {
+    introduction: 0,
+    work: 300,
+    education: 600,
+    skills: 900,
+    projects: 1200,
+    contact: 1500,
+};
+
+const sectionIds = new Set(Object.keys(defaultSectionTops));
+
+const mockSectionLayout = (tops: Record<string, number> = defaultSectionTops) => {
+    const realGetElementById = Document.prototype.getElementById.bind(document);
+    return vi.spyOn(document, 'getElementById').mockImplementation((id) => {
+        if (!sectionIds.has(id)) {
+            return realGetElementById(id);
+        }
+        return {
+            getBoundingClientRect: () => ({ top: (tops[id] ?? 9999) - window.scrollY }),
+            offsetHeight: 300,
+        } as unknown as HTMLElement;
+    });
+};
+
+const setNavHeight = (container: HTMLElement, height: number) => {
+    const nav = container.querySelector('nav')!;
+    Object.defineProperty(nav, 'offsetHeight', { value: height, configurable: true });
+};
 
 describe('Navbar Component', () => {
+    const originalInnerWidth = window.innerWidth;
+
     beforeEach(() => {
         vi.clearAllMocks();
-
-        document.getElementById = vi.fn(() => ({
-            getBoundingClientRect: () => ({ top: 100 }),
-            offsetHeight: 200,
-        } as never));
-
-        // The Navbar calls document.querySelector('nav') in two places:
-        //   1. scrollToSection / handleScroll  — reads .offsetHeight
-        //   2. handleClickOutside              — calls .contains(eventTarget)
-        // Both must be satisfied by the mock.
-        document.querySelector = vi.fn(() => ({
-            offsetHeight: 60,
-            contains: () => false,
-        } as never));
+        fireEvent.scroll(window, { target: { scrollY: 0 } });
+        Object.defineProperty(window, 'innerWidth', { value: 375, configurable: true, writable: true });
+        const realGetElementById = Document.prototype.getElementById.bind(document);
+        vi.spyOn(document, 'getElementById').mockImplementation((id) => {
+            if (!sectionIds.has(id)) {
+                return realGetElementById(id);
+            }
+            return {
+                getBoundingClientRect: () => ({ top: 100 - window.scrollY }),
+                offsetHeight: 200,
+            } as unknown as HTMLElement;
+        });
     });
 
     afterEach(() => {
+        vi.useRealTimers();
         vi.restoreAllMocks();
-        document.body.style.overflow = 'unset';
+        document.body.style.overflow = '';
+        fireEvent.scroll(window, { target: { scrollY: 0 } });
+        Object.defineProperty(window, 'innerWidth', { value: originalInnerWidth, configurable: true, writable: true });
+        Reflect.deleteProperty(document.documentElement, 'scrollHeight');
+        Reflect.deleteProperty(window, 'matchMedia');
     });
 
-    // Test Case 1: Component renders with all navigation links
     it('renders all navigation sections in desktop view', () => {
-        render(<Navbar />);
+        render(<Navbar name="Vince Ocampo" />);
 
         const expectedSections = ['Introduction', 'Work', 'Education', 'Skills', 'Projects', 'Contact'];
         expectedSections.forEach((section) => {
-            // getAllByRole because each label appears in both desktop and mobile nav
             const buttons = screen.getAllByRole('button', { name: section });
             expect(buttons.length).toBeGreaterThan(0);
+            buttons.forEach((btn) => expect(btn).toHaveAttribute('type', 'button'));
         });
     });
 
-    // Test Case 2: Mobile menu toggle functionality
-    // The desktop <ul> is always in the DOM (just CSS-hidden via Tailwind), so
-    // queryByRole('list') always finds it. Instead, we query for the mobile panel
-    // div by its unique classes (.absolute.top-full), which only mounts when open.
-    it('toggles mobile menu when hamburger button is clicked', () => {
-        const { container } = render(<Navbar />);
+    it('toggles mobile menu and updates aria-expanded when hamburger button is clicked', () => {
+        const { container } = render(<Navbar name="Vince Ocampo" />);
 
         const toggleButton = screen.getByRole('button', { name: /toggle navigation menu/i });
-        expect(toggleButton).toBeInTheDocument();
+        expect(toggleButton).toHaveAttribute('aria-expanded', 'false');
+        expect(toggleButton).toHaveAttribute('aria-controls', 'mobile-nav-menu');
 
-        const getMobilePanel = () => container.querySelector('.absolute.top-full');
-
+        const getMobilePanel = () => container.querySelector('#mobile-nav-menu');
         expect(getMobilePanel()).not.toBeInTheDocument();
 
         fireEvent.click(toggleButton);
+        expect(toggleButton).toHaveAttribute('aria-expanded', 'true');
         expect(getMobilePanel()).toBeInTheDocument();
 
         fireEvent.click(toggleButton);
+        expect(toggleButton).toHaveAttribute('aria-expanded', 'false');
         expect(getMobilePanel()).not.toBeInTheDocument();
     });
 
-    // Test Case 3: Active section highlighting
-    it('highlights active section correctly', () => {
-        render(<Navbar />);
+    it('highlights active section and sets aria-current correctly', () => {
+        render(<Navbar name="Vince Ocampo" />);
 
-        // "introduction" is the default activeSection in useState
         const introButtons = screen.getAllByRole('button', { name: 'Introduction' });
-        const hasActiveClass = introButtons.some((btn) =>
-            btn.classList.contains('text-blue-600')
-        );
-        expect(hasActiveClass).toBe(true);
+        expect(introButtons[0]).toHaveClass('text-blue-600', 'bg-blue-50');
+        expect(introButtons[0]).toHaveAttribute('aria-current', 'true');
 
-        // Non-active section must not carry the active background
         const workButtons = screen.getAllByRole('button', { name: 'Work' });
         workButtons.forEach((btn) => {
             expect(btn).not.toHaveClass('bg-blue-50');
+            expect(btn).not.toHaveAttribute('aria-current');
         });
     });
 
-    // Test Case 4: Scroll to section functionality
     it('scrolls to correct section when navigation link is clicked', () => {
-        render(<Navbar />);
+        const { container } = render(<Navbar name="Vince Ocampo" />);
+        setNavHeight(container, 60);
 
         const workButtons = screen.getAllByRole('button', { name: 'Work' });
         fireEvent.click(workButtons[0]);
 
+        expect(mockScrollTo).toHaveBeenCalledWith({
+            top: 100 - 60 - 20,
+            behavior: 'smooth',
+        });
+    });
+
+    it('respects prefers-reduced-motion when scrolling to a section', () => {
+        Object.defineProperty(window, 'matchMedia', {
+            configurable: true,
+            value: vi.fn().mockReturnValue({ matches: true }),
+        });
+
+        render(<Navbar name="Vince Ocampo" />);
+        fireEvent.click(screen.getAllByRole('button', { name: 'Work' })[0]);
+
         expect(mockScrollTo).toHaveBeenCalledWith(
-            expect.objectContaining({ behavior: 'smooth' })
+            expect.objectContaining({ behavior: 'auto' })
         );
     });
 
-    // Test Case 5: Mobile menu closes when clicking outside
-    // Uses the same panel-div strategy as Test 2. The mock's contains() returns
-    // false, so the Navbar correctly treats any event target as "outside".
-    it('closes mobile menu when clicking outside', async () => {
-        const { container } = render(<Navbar />);
+    it('closes mobile menu when clicking outside nav, but stays open when clicking inside nav', () => {
+        const { container } = render(<Navbar name="Vince Ocampo" />);
 
         const toggleButton = screen.getByRole('button', { name: /toggle navigation menu/i });
-        const getMobilePanel = () => container.querySelector('.absolute.top-full');
+        const getMobilePanel = () => container.querySelector('#mobile-nav-menu');
+        const nav = container.querySelector('nav')!;
 
         fireEvent.click(toggleButton);
         expect(getMobilePanel()).toBeInTheDocument();
 
-        fireEvent.mouseDown(document.body);
+        // Clicking inside <nav> must not close the menu
+        fireEvent.mouseDown(nav);
+        expect(getMobilePanel()).toBeInTheDocument();
 
-        await waitFor(() => {
-            expect(getMobilePanel()).not.toBeInTheDocument();
-        });
+        // Clicking outside <nav> closes the menu
+        fireEvent.mouseDown(document.body);
+        expect(getMobilePanel()).not.toBeInTheDocument();
     });
 
-    // Test Case 6: Body overflow is controlled with mobile menu
-    it('prevents body scroll when mobile menu is open', () => {
-        render(<Navbar />);
+    it('closes mobile menu when Escape is pressed and ignores other keys', () => {
+        const { container } = render(<Navbar name="Vince Ocampo" />);
+        const getMobilePanel = () => container.querySelector('#mobile-nav-menu');
+
+        fireEvent.click(screen.getByRole('button', { name: /toggle navigation menu/i }));
+        expect(getMobilePanel()).toBeInTheDocument();
+
+        fireEvent.keyDown(document, { key: 'Enter' });
+        expect(getMobilePanel()).toBeInTheDocument();
+
+        fireEvent.keyDown(document, { key: 'Escape' });
+        expect(getMobilePanel()).not.toBeInTheDocument();
+    });
+
+    it('closes mobile menu and restores body scroll when resized to desktop width', () => {
+        const { container } = render(<Navbar name="Vince Ocampo" />);
+        const getMobilePanel = () => container.querySelector('#mobile-nav-menu');
+
+        fireEvent.click(screen.getByRole('button', { name: /toggle navigation menu/i }));
+        expect(getMobilePanel()).toBeInTheDocument();
+        expect(document.body.style.overflow).toBe('hidden');
+
+        // Still mobile width — stays open
+        Object.defineProperty(window, 'innerWidth', { value: 600, configurable: true, writable: true });
+        fireEvent(window, new Event('resize'));
+        expect(getMobilePanel()).toBeInTheDocument();
+
+        // Resized past md breakpoint — closes and restores scroll
+        Object.defineProperty(window, 'innerWidth', { value: 1024, configurable: true, writable: true });
+        fireEvent(window, new Event('resize'));
+        expect(getMobilePanel()).not.toBeInTheDocument();
+        expect(document.body.style.overflow).toBe('');
+    });
+
+    it('prevents body scroll when mobile menu is open and clears it when closed', () => {
+        render(<Navbar name="Vince Ocampo" />);
 
         const toggleButton = screen.getByRole('button', { name: /toggle navigation menu/i });
 
@@ -121,82 +196,61 @@ describe('Navbar Component', () => {
         expect(document.body.style.overflow).toBe('hidden');
 
         fireEvent.click(toggleButton);
-        expect(document.body.style.overflow).toBe('unset');
+        expect(document.body.style.overflow).toBe('');
     });
 
-    // Test Case 7: Mobile navigation shows username
-    it('displays user name in mobile navigation header', () => {
-        render(<Navbar />);
-        expect(screen.getByText('Vince Ocampo')).toBeInTheDocument();
+    it('displays the provided name in mobile navigation header', () => {
+        render(<Navbar name="Jane Doe" />);
+        expect(screen.getByText('Jane Doe')).toBeInTheDocument();
     });
 
-    // Test Case 8: Scroll spy updates active section
-    it('updates active section based on scroll position', async () => {
-        document.getElementById = vi.fn((id) => {
-            const tops: Record<string, number> = {
-                introduction: 0,
-                work: 300,
-                education: 600,
-                skills: 900,
-                projects: 1200,
-                contact: 1500,
-            };
-            return {
-                getBoundingClientRect: () => ({ top: tops[id] ?? 9999 }),
-                offsetHeight: 250,
-            } as never;
-        });
+    it('updates active section as the page scrolls through sections', () => {
+        mockSectionLayout();
+        const { container } = render(<Navbar name="Vince Ocampo" />);
+        setNavHeight(container, 60);
 
-        render(<Navbar />);
-        fireEvent.scroll(window, { target: { scrollY: 0 } });
+        const activeDesktopSection = () =>
+            screen.getAllByRole('button')
+                .find(btn => btn.getAttribute('aria-current') === 'true')
+                ?.textContent;
 
-        await waitFor(() => {
-            const introButtons = screen.getAllByRole('button', { name: 'Introduction' });
-            const hasActive = introButtons.some((btn) => btn.classList.contains('text-blue-600'));
-            expect(hasActive).toBe(true);
-        });
+        expect(activeDesktopSection()).toBe('Introduction');
+
+        fireEvent.scroll(window, { target: { scrollY: 300 } });
+        expect(activeDesktopSection()).toBe('Work');
+
+        fireEvent.scroll(window, { target: { scrollY: 900 } });
+        expect(activeDesktopSection()).toBe('Skills');
     });
 
-    // Test Case 9: Responsive classes are applied
     it('applies correct responsive classes for desktop and mobile', () => {
-        const { container } = render(<Navbar />);
+        const { container } = render(<Navbar name="Vince Ocampo" />);
 
-        const desktopNav = container.querySelector('.hidden.md\\:block');
-        expect(desktopNav).toBeInTheDocument();
-
-        const mobileNav = container.querySelector('.md\\:hidden');
-        expect(mobileNav).toBeInTheDocument();
+        expect(container.querySelector('.hidden.md\\:block')).toBeInTheDocument();
+        expect(container.querySelector('.md\\:hidden')).toBeInTheDocument();
     });
 
-    // Test Case 10: Navigation links have correct accessibility attributes
-    it('provides proper accessibility attributes', () => {
-        const { container } = render(<Navbar />);
-
-        const toggleButton = screen.getByRole('button', { name: /toggle navigation menu/i });
-        expect(toggleButton).toHaveAttribute('aria-label', 'Toggle navigation menu');
-
-        // Use container (real rendered DOM) instead of document.querySelector,
-        // which is mocked in beforeEach and returns a plain object.
-        const nav = container.querySelector('nav');
-        expect(nav).toBeInTheDocument();
-    });
-
-    // Test Case 11: Clicking the backdrop closes the mobile menu
-    it('closes mobile menu when the backdrop is clicked', () => {
-        const { container } = render(<Navbar />);
-        const getMobilePanel = () => container.querySelector('.absolute.top-full');
+    it('renders backdrop outside nav and closes mobile menu when backdrop is clicked', () => {
+        const { container } = render(<Navbar name="Vince Ocampo" />);
+        const getMobilePanel = () => container.querySelector('#mobile-nav-menu');
+        const nav = container.querySelector('nav')!;
 
         fireEvent.click(screen.getByRole('button', { name: /toggle navigation menu/i }));
         expect(getMobilePanel()).toBeInTheDocument();
 
-        fireEvent.click(container.querySelector('.fixed.inset-0') as Element);
+        const backdrop = container.querySelector('.fixed.inset-0') as Element;
+        expect(backdrop).toBeInTheDocument();
+        // Must not be inside <nav> so backdrop-blur does not trap position: fixed
+        expect(nav.contains(backdrop)).toBe(false);
+
+        fireEvent.click(backdrop);
         expect(getMobilePanel()).not.toBeInTheDocument();
     });
 
-    // Test Case 12: Mobile menu item scrolls to the section and closes the menu
     it('scrolls and closes mobile menu when a mobile menu item is clicked', () => {
-        const { container } = render(<Navbar />);
-        const getMobilePanel = () => container.querySelector('.absolute.top-full');
+        const { container } = render(<Navbar name="Vince Ocampo" />);
+        setNavHeight(container, 60);
+        const getMobilePanel = () => container.querySelector('#mobile-nav-menu');
 
         fireEvent.click(screen.getByRole('button', { name: /toggle navigation menu/i }));
         const mobileButtons = screen.getAllByRole('button', { name: 'Projects' });
@@ -206,60 +260,33 @@ describe('Navbar Component', () => {
         expect(getMobilePanel()).not.toBeInTheDocument();
     });
 
-    // Test Case 13: Missing section element is ignored
     it('does not scroll when the target section does not exist', () => {
-        document.getElementById = vi.fn(() => null);
-        render(<Navbar />);
+        vi.spyOn(document, 'getElementById').mockReturnValue(null);
+        render(<Navbar name="Vince Ocampo" />);
 
         fireEvent.click(screen.getAllByRole('button', { name: 'Work' })[0]);
 
         expect(mockScrollTo).not.toHaveBeenCalled();
     });
 
-    // Test Case 14: Falls back to zero offset when no navbar is found
-    it('scrolls without navbar offset when the nav element is not found', () => {
-        document.querySelector = vi.fn(() => null);
-        render(<Navbar />);
+    it('scrolls with zero navbar offset when nav height is zero', () => {
+        render(<Navbar name="Vince Ocampo" />);
 
         fireEvent.click(screen.getAllByRole('button', { name: 'Work' })[0]);
 
         expect(mockScrollTo).toHaveBeenCalledWith({ top: 100 - 20, behavior: 'smooth' });
     });
-    describe('active section near the bottom of the page', () => {
-        // Sections laid out 300px apart, as in Test Case 8
-        const mockSectionLayout = () => {
-            document.getElementById = vi.fn((id) => {
-                const tops: Record<string, number> = {
-                    introduction: 0,
-                    work: 300,
-                    education: 600,
-                    skills: 900,
-                    projects: 1200,
-                    contact: 1500,
-                };
-                return {
-                    getBoundingClientRect: () => ({ top: tops[id] ?? 9999 }),
-                    offsetHeight: 250,
-                } as never;
-            });
-        };
 
+    describe('active section near the bottom of the page', () => {
         const activeDesktopSection = () =>
             screen.getAllByRole('button')
-                .find(btn => btn.classList.contains('bg-blue-50') && btn.classList.contains('rounded'))
+                .find(btn => btn.getAttribute('aria-current') === 'true')
                 ?.textContent;
 
-        afterEach(() => {
-            vi.useRealTimers();
-            fireEvent.scroll(window, { target: { scrollY: 0 } });
-            Reflect.deleteProperty(document.documentElement, 'scrollHeight');
-        });
-
-        // Test Case 15: The clicked section stays highlighted while the page scrolls to it
         it('keeps the clicked section highlighted while scrolling to it', () => {
             vi.useFakeTimers();
             mockSectionLayout();
-            render(<Navbar />);
+            render(<Navbar name="Vince Ocampo" />);
 
             fireEvent.click(screen.getAllByRole('button', { name: 'Projects' })[0]);
             expect(activeDesktopSection()).toBe('Projects');
@@ -269,11 +296,10 @@ describe('Navbar Component', () => {
             expect(activeDesktopSection()).toBe('Projects');
         });
 
-        // Test Case 16: The scroll spy resumes once the scroll has settled
         it('resumes updating the active section after the scroll settles', () => {
             vi.useFakeTimers();
             mockSectionLayout();
-            render(<Navbar />);
+            render(<Navbar name="Vince Ocampo" />);
 
             fireEvent.click(screen.getAllByRole('button', { name: 'Projects' })[0]);
             act(() => {
@@ -284,11 +310,10 @@ describe('Navbar Component', () => {
             expect(activeDesktopSection()).toBe('Introduction');
         });
 
-        // Test Case 17: Reaching the bottom of the page highlights the last section
         it('highlights Contact when scrolled to the bottom of the page', () => {
             mockSectionLayout();
             Object.defineProperty(document.documentElement, 'scrollHeight', { value: 2000, configurable: true });
-            render(<Navbar />);
+            render(<Navbar name="Vince Ocampo" />);
 
             fireEvent.scroll(window, { target: { scrollY: 2000 - window.innerHeight } });
             expect(activeDesktopSection()).toBe('Contact');

@@ -9,14 +9,12 @@ import Skills from "./components/Skills";
 import Projects from "./components/Projects";
 import Contact from "./components/Contact";
 
-import "./index.css";
-
 function App() {
     const data: Resume = resume;
     return (
         <div className="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
-            <Navbar />
-            <main className="w-full max-w-5xl mx-auto px-4 sm:px-6">
+            <Navbar name={data.introduction.name} />
+            <main className="w-full">
                 <Introduction data={data.introduction} />
                 <WorkExperience data={data.workExperience} />
                 <Education data={data.education} />
@@ -27,4 +25,5 @@ function App() {
         </div>
     );
 }
+
 export default App;

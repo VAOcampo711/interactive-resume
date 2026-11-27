@@ -100,11 +100,11 @@ describe('WorkExperience Component', () => {
             expect(screen.getByText(detail).tagName).toBe('LI');
         });
 
-        // Every <ul> should carry the list-disc and list-inside classes
+        // Every <ul> should carry the list-disc, list-outside and pl-5 classes
         const lists = container.querySelectorAll('ul');
         expect(lists.length).toBeGreaterThan(0);
         lists.forEach(ul => {
-            expect(ul).toHaveClass('list-disc', 'list-inside');
+            expect(ul).toHaveClass('list-disc', 'list-outside', 'pl-5');
         });
     });
 
