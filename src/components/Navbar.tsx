@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Menu, X } from 'lucide-react';
 
 const sections = ["introduction", "work", "education", "skills", "projects", "contact"] as const;
@@ -13,7 +13,29 @@ const sectionDisplayNames: Record<SectionId, string> = {
     contact: "Contact"
 };
 
-const DESKTOP_BREAKPOINT = 768;
+// Tailwind's md breakpoint (48rem), where md:hidden hides the mobile menu
+const DESKTOP_MEDIA_QUERY = '(min-width: 48rem)';
+
+// Returns the section under the navbar, or the last section when scrolled to the bottom
+const getActiveSection = (navbarHeight: number): SectionId | undefined => {
+    // At the bottom of a scrollable page, the last section can't reach the top, so pick it directly
+    const { scrollHeight } = document.documentElement;
+    const isScrollable = scrollHeight > window.innerHeight;
+    if (isScrollable && window.innerHeight + window.scrollY >= scrollHeight - 2) {
+        return sections[sections.length - 1];
+    }
+
+    const scrollPosition = window.scrollY + navbarHeight + 50; // Add some buffer
+
+    return sections.find((section) => {
+        const element = document.getElementById(section);
+        if (!element) {
+            return false;
+        }
+        const offsetTop = element.getBoundingClientRect().top + window.scrollY;
+        return scrollPosition >= offsetTop && scrollPosition < offsetTop + element.offsetHeight;
+    });
+};
 
 export default function Navbar({ name }: { name: string }) {
     const [activeSection, setActiveSection] = useState<SectionId>("introduction");
@@ -22,14 +44,27 @@ export default function Navbar({ name }: { name: string }) {
     // True while scrolling to a clicked section, so the scroll spy doesn't override the highlight
     const isNavigatingRef = useRef(false);
     const navigationTimerRef = useRef<number | undefined>(undefined);
+    // Scroll position the current navigation will stop at
+    const navigationTargetRef = useRef(0);
 
-    // Ends navigation once scrolling has been idle for a moment (also covers clicks that don't scroll)
-    const settleNavigation = () => {
+    const updateActiveSection = useCallback(() => {
+        const section = getActiveSection(navRef.current?.offsetHeight ?? 0);
+        if (section) {
+            setActiveSection(section);
+        }
+    }, []);
+
+    // Ends navigation once scrolling has been idle for a moment (also covers clicks that don't scroll).
+    // If the user scrolled away from the clicked section in the meantime, re-check what's in view.
+    const settleNavigation = useCallback(() => {
         window.clearTimeout(navigationTimerRef.current);
         navigationTimerRef.current = window.setTimeout(() => {
             isNavigatingRef.current = false;
+            if (Math.abs(window.scrollY - navigationTargetRef.current) > 2) {
+                updateActiveSection();
+            }
         }, 150);
-    };
+    }, [updateActiveSection]);
 
     const scrollToSection = (sectionId: SectionId) => {
         const element = document.getElementById(sectionId);
@@ -42,6 +77,10 @@ export default function Navbar({ name }: { name: string }) {
             // Calculate the position to scroll to (element top - navbar height - some padding)
             const elementPosition = element.getBoundingClientRect().top + window.scrollY;
             const offsetPosition = elementPosition - navbarHeight - 20; // 20px extra padding
+
+            // The page can't scroll past its bottom, so that's where scrolling to a late section stops
+            const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+            navigationTargetRef.current = Math.min(Math.max(0, offsetPosition), maxScroll);
 
             // Highlight the clicked section straight away. Sections near the bottom of the page
             // can't always be scrolled to the top, so the scroll spy would pick one above them.
@@ -64,30 +103,7 @@ export default function Navbar({ name }: { name: string }) {
                 settleNavigation();
                 return;
             }
-
-            // At the bottom of a scrollable page, the last section can't reach the top, so pick it directly
-            const { scrollHeight } = document.documentElement;
-            const isScrollable = scrollHeight > window.innerHeight;
-            if (isScrollable && window.innerHeight + window.scrollY >= scrollHeight - 2) {
-                setActiveSection(sections[sections.length - 1]);
-                return;
-            }
-
-            const navbarHeight = navRef.current?.offsetHeight ?? 0;
-            const scrollPosition = window.scrollY + navbarHeight + 50; // Add some buffer
-
-            for (const section of sections) {
-                const element = document.getElementById(section);
-                if (element) {
-                    const offsetTop = element.getBoundingClientRect().top + window.scrollY;
-                    const offsetBottom = offsetTop + element.offsetHeight;
-
-                    if (scrollPosition >= offsetTop && scrollPosition < offsetBottom) {
-                        setActiveSection(section);
-                        break;
-                    }
-                }
-            }
+            updateActiveSection();
         };
 
         window.addEventListener('scroll', handleScroll, { passive: true });
@@ -98,19 +114,15 @@ export default function Navbar({ name }: { name: string }) {
             window.removeEventListener('scroll', handleScroll);
             window.clearTimeout(navigationTimerRef.current);
         };
-    }, []);
+    }, [settleNavigation, updateActiveSection]);
 
-    // Close mobile menu on outside click, Escape key, or resize to desktop, and lock body scroll while open
+    // Close mobile menu on Escape or when widened to desktop, and lock body scroll while open.
+    // Taps outside the menu land on the backdrop, which closes it on click. Don't also close on
+    // mousedown: that removes the backdrop mid-tap and lets the click hit the page underneath.
     useEffect(() => {
         if (!isMobileMenuOpen) {
             return;
         }
-
-        const handleClickOutside = (event: MouseEvent) => {
-            if (navRef.current && !navRef.current.contains(event.target as Node)) {
-                setIsMobileMenuOpen(false);
-            }
-        };
 
         const handleKeyDown = (event: KeyboardEvent) => {
             if (event.key === 'Escape') {
@@ -118,21 +130,20 @@ export default function Navbar({ name }: { name: string }) {
             }
         };
 
-        const handleResize = () => {
-            if (window.innerWidth >= DESKTOP_BREAKPOINT) {
+        const desktopQuery = window.matchMedia?.(DESKTOP_MEDIA_QUERY);
+        const handleDesktopChange = (event: MediaQueryListEvent) => {
+            if (event.matches) {
                 setIsMobileMenuOpen(false);
             }
         };
 
-        document.addEventListener('mousedown', handleClickOutside);
         document.addEventListener('keydown', handleKeyDown);
-        window.addEventListener('resize', handleResize);
+        desktopQuery?.addEventListener('change', handleDesktopChange);
         document.body.style.overflow = 'hidden';
 
         return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
             document.removeEventListener('keydown', handleKeyDown);
-            window.removeEventListener('resize', handleResize);
+            desktopQuery?.removeEventListener('change', handleDesktopChange);
             document.body.style.overflow = '';
         };
     }, [isMobileMenuOpen]);

@@ -52,11 +52,15 @@ describe('App Component', () => {
     it('passes resume.json data to all components correctly', () => {
         render(<App />);
 
+        // This renders the real resume.json, where text can legitimately appear more than once
+        // (e.g. a skill listed in two categories), so check for at least one match
+        const expectRendered = (text: string) => expect(screen.getAllByText(text).length).toBeGreaterThan(0);
+
         expect(screen.getByRole('heading', { level: 1, name: resume.introduction.name })).toBeInTheDocument();
-        expect(screen.getByText(resume.workExperience[0].company)).toBeInTheDocument();
-        expect(screen.getByText(resume.education[0].institution)).toBeInTheDocument();
-        expect(screen.getByText(resume.skills[0].skills[0])).toBeInTheDocument();
-        expect(screen.getByText(resume.projects[0].title)).toBeInTheDocument();
+        expectRendered(resume.workExperience[0].company);
+        expectRendered(resume.education[0].institution);
+        expectRendered(resume.skills[0].skills[0]);
+        expectRendered(resume.projects[0].title);
         expect(screen.getByRole('link', { name: 'Email' })).toHaveAttribute(
             'href',
             `mailto:${resume.contact.email}`

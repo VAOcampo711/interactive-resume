@@ -19,7 +19,7 @@ A modern, responsive resume website built with React, TypeScript, and Tailwind C
 
 ## Tech Stack
 
-- **Frontend**: React, TypeScript
+- **Frontend**: React, TypeScript (`tsc` is TypeScript 7, see [CLAUDE.md](CLAUDE.md) for why TypeScript 6 is also installed)
 - **Styling**: Tailwind CSS
 - **Icons**: Lucide
 - **Build Tool**: Vite
@@ -32,10 +32,11 @@ A modern, responsive resume website built with React, TypeScript, and Tailwind C
 
 ```
 .github/
-├── workflows/cicd.yml  # PR checks: lint, tests + coverage, audit, build
+├── workflows/cicd.yml  # CI: lint, tests + coverage, audit, build
 └── dependabot.yml      # Weekly dependency update PRs
 public/
-└── assets/cv/          # Downloadable CV files (PDF and Word)
+├── assets/cv/          # Downloadable CV files (PDF and Word)
+└── og-image.png        # Link-preview image (1200×630)
 src/
 ├── components/          # React components
 │   ├── Contact.tsx     # Contact information section
@@ -61,7 +62,7 @@ src/
 
 ### Prerequisites
 
-- Node.js 22.13 or later (Node 26 Active LTS is pinned in `.nvmrc`, so `nvm use` picks it up)
+- Node.js 22.13+, 24 or 26 (26 is pinned in `.nvmrc`, so `nvm use` picks it up)
 - npm
 
 ### Installation
@@ -161,7 +162,7 @@ Place your CV files in `public/assets/cv/`. The download links in `src/component
 
 ### Page Title and Link Previews
 
-The page title, description and link-preview (Open Graph) tags are in `index.html`. Update them along with the tagline so shared links describe the current CV.
+The page title, description and link-preview (Open Graph) tags are in `index.html`, and the preview image is `public/og-image.png`. Update them along with the name or tagline so shared links describe the current CV.
 
 ### Customize Styling
 
@@ -185,7 +186,7 @@ Coverage thresholds are set in `vite.config.ts`, and the run fails if coverage d
 
 ## Continuous Integration
 
-Every push and pull request to `master` or `develop` runs [cicd.yml](.github/workflows/cicd.yml):
+Every push to `master` or `develop`, and every pull request into `develop` (such as Dependabot's), runs [cicd.yml](.github/workflows/cicd.yml). Pull requests from `develop` to `master` show the result of the push run for the same commit:
 
 1. Lint (`npm run lint`)
 2. Tests with coverage thresholds (`npm run test:coverage`)

@@ -49,12 +49,14 @@ describe('Projects Component', () => {
         expect(githubLinks[0]).toHaveAttribute('href', 'https://github.com/VAOcampo711/interactive-resume');
         expect(githubLinks[0]).toHaveAttribute('target', '_blank');
         expect(githubLinks[0]).toHaveAttribute('rel', 'noopener noreferrer');
-        expect(githubLinks[0]).toHaveAttribute('aria-label', 'View Interactive Resume on GitHub');
+        // Accessible name starts with the visible text so voice control can match it
+        expect(githubLinks[0]).toHaveAccessibleName('View on GitHub: Interactive Resume');
+        expect(githubLinks[0]).not.toHaveAttribute('aria-label');
 
         expect(githubLinks[1]).toHaveAttribute('href', 'https://github.com/VAOcampo711/ecommerce-platform');
         expect(githubLinks[1]).toHaveAttribute('target', '_blank');
         expect(githubLinks[1]).toHaveAttribute('rel', 'noopener noreferrer');
-        expect(githubLinks[1]).toHaveAttribute('aria-label', 'View E-commerce Platform on GitHub');
+        expect(githubLinks[1]).toHaveAccessibleName('View on GitHub: E-commerce Platform');
     });
 
     it('does not render GitHub link for projects without github property', () => {
