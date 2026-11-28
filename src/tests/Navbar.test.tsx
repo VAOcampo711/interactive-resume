@@ -35,12 +35,9 @@ const setNavHeight = (container: HTMLElement, height: number) => {
 };
 
 describe('Navbar Component', () => {
-    const originalInnerWidth = window.innerWidth;
-
     beforeEach(() => {
         vi.clearAllMocks();
         fireEvent.scroll(window, { target: { scrollY: 0 } });
-        Object.defineProperty(window, 'innerWidth', { value: 375, configurable: true, writable: true });
         const realGetElementById = Document.prototype.getElementById.bind(document);
         vi.spyOn(document, 'getElementById').mockImplementation((id) => {
             if (!sectionIds.has(id)) {
@@ -58,7 +55,6 @@ describe('Navbar Component', () => {
         vi.restoreAllMocks();
         document.body.style.overflow = '';
         fireEvent.scroll(window, { target: { scrollY: 0 } });
-        Object.defineProperty(window, 'innerWidth', { value: originalInnerWidth, configurable: true, writable: true });
         Reflect.deleteProperty(document.documentElement, 'scrollHeight');
         Reflect.deleteProperty(window, 'matchMedia');
     });
@@ -134,22 +130,20 @@ describe('Navbar Component', () => {
         );
     });
 
-    it('closes mobile menu when clicking outside nav, but stays open when clicking inside nav', () => {
+    it('does not close mobile menu on mousedown, so a backdrop tap cannot click through to the page', () => {
         const { container } = render(<Navbar name="Vince Ocampo" />);
-
-        const toggleButton = screen.getByRole('button', { name: /toggle navigation menu/i });
         const getMobilePanel = () => container.querySelector('#mobile-nav-menu');
-        const nav = container.querySelector('nav')!;
 
-        fireEvent.click(toggleButton);
-        expect(getMobilePanel()).toBeInTheDocument();
+        fireEvent.click(screen.getByRole('button', { name: /toggle navigation menu/i }));
+        const backdrop = container.querySelector('.fixed.inset-0') as Element;
 
-        // Clicking inside <nav> must not close the menu
-        fireEvent.mouseDown(nav);
-        expect(getMobilePanel()).toBeInTheDocument();
-
-        // Clicking outside <nav> closes the menu
+        // The backdrop must stay mounted until the tap's click arrives
+        fireEvent.mouseDown(backdrop);
         fireEvent.mouseDown(document.body);
+        expect(getMobilePanel()).toBeInTheDocument();
+        expect(backdrop).toBeInTheDocument();
+
+        fireEvent.click(backdrop);
         expect(getMobilePanel()).not.toBeInTheDocument();
     });
 
@@ -167,24 +161,35 @@ describe('Navbar Component', () => {
         expect(getMobilePanel()).not.toBeInTheDocument();
     });
 
-    it('closes mobile menu and restores body scroll when resized to desktop width', () => {
+    it('closes mobile menu and restores body scroll when widened past the md breakpoint', () => {
+        let onDesktopChange: ((event: { matches: boolean }) => void) | undefined;
+        const desktopQuery = {
+            matches: false,
+            addEventListener: vi.fn((_type: string, listener: typeof onDesktopChange) => {
+                onDesktopChange = listener;
+            }),
+            removeEventListener: vi.fn(),
+        };
+        const matchMedia = vi.fn().mockReturnValue(desktopQuery);
+        Object.defineProperty(window, 'matchMedia', { configurable: true, value: matchMedia });
+
         const { container } = render(<Navbar name="Vince Ocampo" />);
         const getMobilePanel = () => container.querySelector('#mobile-nav-menu');
 
         fireEvent.click(screen.getByRole('button', { name: /toggle navigation menu/i }));
         expect(getMobilePanel()).toBeInTheDocument();
         expect(document.body.style.overflow).toBe('hidden');
+        expect(matchMedia).toHaveBeenCalledWith('(min-width: 48rem)');
 
-        // Still mobile width — stays open
-        Object.defineProperty(window, 'innerWidth', { value: 600, configurable: true, writable: true });
-        fireEvent(window, new Event('resize'));
+        // Still below md — stays open
+        act(() => onDesktopChange?.({ matches: false }));
         expect(getMobilePanel()).toBeInTheDocument();
 
-        // Resized past md breakpoint — closes and restores scroll
-        Object.defineProperty(window, 'innerWidth', { value: 1024, configurable: true, writable: true });
-        fireEvent(window, new Event('resize'));
+        // Crossed into md — closes, restores scroll and stops listening
+        act(() => onDesktopChange?.({ matches: true }));
         expect(getMobilePanel()).not.toBeInTheDocument();
         expect(document.body.style.overflow).toBe('');
+        expect(desktopQuery.removeEventListener).toHaveBeenCalledWith('change', onDesktopChange);
     });
 
     it('prevents body scroll when mobile menu is open and clears it when closed', () => {
@@ -308,6 +313,39 @@ describe('Navbar Component', () => {
 
             fireEvent.scroll(window, { target: { scrollY: 0 } });
             expect(activeDesktopSection()).toBe('Introduction');
+        });
+
+        it('re-checks the active section if the user scrolls away before navigation settles', () => {
+            vi.useFakeTimers();
+            mockSectionLayout();
+            Object.defineProperty(document.documentElement, 'scrollHeight', { value: 2000, configurable: true });
+            render(<Navbar name="Vince Ocampo" />);
+
+            fireEvent.click(screen.getAllByRole('button', { name: 'Projects' })[0]);
+            // The user scrolls back up to Work while the smooth scroll is still running
+            fireEvent.scroll(window, { target: { scrollY: 300 } });
+            expect(activeDesktopSection()).toBe('Projects');
+
+            act(() => {
+                vi.advanceTimersByTime(200);
+            });
+            expect(activeDesktopSection()).toBe('Work');
+        });
+
+        it('keeps the clicked section when the page stops short of it at the bottom', () => {
+            vi.useFakeTimers();
+            mockSectionLayout();
+            // Max scroll is 1500 - 768 = 732, short of Projects at 1200
+            Object.defineProperty(document.documentElement, 'scrollHeight', { value: 1500, configurable: true });
+            render(<Navbar name="Vince Ocampo" />);
+
+            fireEvent.click(screen.getAllByRole('button', { name: 'Projects' })[0]);
+            fireEvent.scroll(window, { target: { scrollY: 1500 - window.innerHeight } });
+
+            act(() => {
+                vi.advanceTimersByTime(200);
+            });
+            expect(activeDesktopSection()).toBe('Projects');
         });
 
         it('highlights Contact when scrolled to the bottom of the page', () => {

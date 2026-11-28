@@ -23,10 +23,10 @@ export default function Projects({ data }: { data: Project[] }) {
                                     href={p.github}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    aria-label={`View ${p.title} on GitHub`}
                                     className="text-sm sm:text-base text-blue-600 dark:text-blue-400 mt-2 inline-block hover:underline"
                                 >
                                     View on GitHub
+                                    <span className="sr-only">: {p.title}</span>
                                 </a>
                             )}
                         </div>
